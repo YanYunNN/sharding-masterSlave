@@ -1,0 +1,31 @@
+schemaName: master_slave_db
+#配置数据源
+dataSources:
+  #主库2
+  ds0: !!com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://192.168.1.150:3338/test?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: 123456
+  #主库1
+  ds1: !!com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://192.168.1.150:3339/test?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: 123456
+  #从库1
+  ds2: !!com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://192.168.1.150:3340/test?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: 123456
+
+# 配置读写分离规则
+masterSlaveRule:
+  name: db_ms
+  masterDataSourceName: ds1
+  slaveDataSourceNames: [ds2]
+props:
+  sql.show: true
+
+

@@ -1,0 +1,65 @@
+#schemaName: sharding_master_slave_db
+#配置数据源
+props:
+  sql.show: true
+
+dataSources:
+  #主库2
+  ds0: !!com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://192.168.1.150:3338/ds0?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: 123456
+  #主库1
+  ds1: !!com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://192.168.1.150:3339/ds1?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: 123456
+  #从库1
+  ds1_slave: !!com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://192.168.1.150:3340/ds1?useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: root
+    password: 123456
+
+# 配置分片规则
+shardingRule:
+  tables:
+    ##配置Order表规则
+    t_order:
+      actualDataNodes: ds${0..1}.t_order${0..1}
+      #配置分库 + 分表策略
+      databaseStrategy:
+        inline:
+          # 分片键
+          shardingColumn: user_id
+          # 行表达式
+          algorithmExpression: ds${user_id % 2}
+      tableStrategy:
+        inline:
+          shardingColumn: order_id
+          algorithmExpression: t_order${order_id % 2}
+    ##配置order_item表规则
+    t_order_item:
+      actualDataNodes: ds${0..1}.t_order_item${0..1}
+      databaseStrategy:
+        inline:
+          shardingColumn: user_id
+          algorithmExpression: ds${user_id % 2}
+      tableStrategy:
+        inline:
+          shardingColumn: order_id
+          algorithmExpression: t_order_item${order_id % 2}
+
+
+  #   配置读写分离规则
+  masterSlaveRules:
+    ms_ds0:
+      masterDataSourceName: ds1
+      slaveDataSourceNames:
+        - ds1_slave
+      loadBalanceAlgorithmType: ROUND_ROBIN
+
+
+
